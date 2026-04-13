@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SI-SM 프로젝트 관리</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #222836;
+    --border2: #2e3a50;
+    --accent: #00d4ff;
+    --accent2: #0099cc;
+    --green: #00e676;
+    --orange: #ff9100;
+    --red: #ff3d57;
+    --yellow: #ffd740;
+    --purple: #b388ff;
+    --text: #e8edf5;
+    --text2: #7a8ba0;
+    --text3: #4a5a6e;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Noto Sans KR', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px 28px;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-mark {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: #000;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+
+  .header-title h1 {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+
+  .header-title p {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s ease;
+    font-family: var(--sans);
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+  .btn-primary:hover { background: #00eeff; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,212,255,0.3); }
+
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+  .btn-danger {
+    background: rgba(255,61,87,0.12);
+    color: var(--red);
+    border: 1px solid rgba(255,61,87,0.2);
+  }
+  .btn-danger:hover { background: rgba(255,61,87,0.22); }
+
+  /* STAT CARDS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .stat-card.all::before { background: var(--accent); }
+  .stat-card.si::before { background: var(--green); }
+  .stat-card.sm::before { background: var(--purple); }
+  .stat-card.done::before { background: var(--text3); }
+  .stat-card.urgent::before { background: var(--red); }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: var(--mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-card.all .stat-value { color: var(--accent); }
+  .stat-card.si .stat-value { color: var(--green); }
+  .stat-card.sm .stat-value { color: var(--purple); }
+  .stat-card.done .stat-value { color: var(--text2); }
+  .stat-card.urgent .stat-value { color: var(--red); }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+    max-width: 420px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px 9px 36px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    outline: none;
+    transition: border-color 0.18s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.18s;
+    appearance: none;
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%234a5a6e'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+  }
+
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border2);
+  }
+
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  th:hover { color: var(--accent); }
+  th.sort-asc::after { content: ' ^'; color: var(--accent); }
+  th.sort-desc::after { content: ' v'; color: var(--accent); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+    animation: rowIn 0.3s ease both;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,212,255,0.035); }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  td {
+    padding: 13px 14px;
+    font-size: 13px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  /* PROJECT CODE cell */
+  .code-cell {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .code-si { color: var(--green); }
+  .code-sm { color: var(--purple); }
+
+  /* PROJECT NAME cell */
+  .name-cell {
+    font-weight: 500;
+    color: var(--text);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* CLIENT */
+  .client-cell { color: var(--text2); font-size: 12px; }
+
+  /* TYPE BADGE */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .badge-si {
+    background: rgba(0,230,118,0.1);
+    color: var(--green);
+    border: 1px solid rgba(0,230,118,0.25);
+  }
+  .badge-sm {
+    background: rgba(179,136,255,0.1);
+    color: var(--purple);
+    border: 1px solid rgba(179,136,255,0.25);
+  }
+
+  /* STATUS */
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-active { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.8s infinite; }
+  .dot-wait   { background: var(--yellow); }
+  .dot-review { background: var(--orange); }
+  .dot-done   { background: var(--text3); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 110px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 5px;
+    background: var(--border2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-fill.low  { background: var(--red); }
+  .progress-fill.mid  { background: var(--orange); }
+  .progress-fill.high { background: var(--green); }
+
+  .progress-pct {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    width: 32px;
+    text-align: right;
+  }
+
+  /* D-DAY */
+  .dday {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .dday-urgent { color: var(--red); background: rgba(255,61,87,0.1); }
+  .dday-near   { color: var(--orange); background: rgba(255,145,0,0.1); }
+  .dday-ok     { color: var(--green); background: rgba(0,230,118,0.1); }
+  .dday-done   { color: var(--text3); background: rgba(74,90,110,0.1); }
+
+  /* DATE */
+  .date-cell { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+
+  /* ACTIONS */
+  .actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    color: var(--text2);
+    font-size: 14px;
+  }
+  .icon-btn:hover.edit  { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.07); }
+  .icon-btn:hover.del   { border-color: var(--red);   color: var(--red);   background: rgba(255,61,87,0.07); }
+
+  /* EMPTY */
+  .empty-row td {
+    text-align: center;
+    padding: 60px;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 32px;
+    width: 540px;
+    max-width: 95vw;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.22s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 26px;
+  }
+  .modal-title {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { border-color: var(--red); color: var(--red); }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text2);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  /* CODE PREVIEW inside modal */
+  .code-preview-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-preview-badge {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 0;
+  }
+
+  input, select, textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    outline: none;
+    transition: border-color 0.18s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text3); }
+
+  .seq-input-wrap {
+    position: relative;
+  }
+  .seq-prefix {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text2);
+    pointer-events: none;
+    font-weight: 600;
+  }
+  .seq-input {
+    padding-left: 82px !important;
+    font-family: var(--mono) !important;
+    letter-spacing: 1px;
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 2000;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.25s ease;
+    font-family: var(--sans);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error   { border-left: 3px solid var(--red); }
+  .toast.info    { border-left: 3px solid var(--accent); }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text2);
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .container { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-mark">PM</div>
+      <div class="header-title">
+        <h1>SI-SM PROJECT MANAGER</h1>
+        <p id="dateStamp">-- Loading --</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-ghost" onclick="exportCSV()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSV 내보내기
+      </button>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        프로젝트 추가
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card all">
+      <div class="stat-label">TOTAL</div>
+      <div class="stat-value" id="statTotal">0</div>
+    </div>
+    <div class="stat-card si">
+      <div class="stat-label">SI</div>
+      <div class="stat-value" id="statSI">0</div>
+    </div>
+    <div class="stat-card sm">
+      <div class="stat-label">SM</div>
+      <div class="stat-value" id="statSM">0</div>
+    </div>
+    <div class="stat-card done">
+      <div class="stat-label">DONE</div>
+      <div class="stat-value" id="statDone">0</div>
+    </div>
+    <div class="stat-card urgent">
+      <div class="stat-label">URGENT</div>
+      <div class="stat-value" id="statUrgent">0</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="search-wrap">
+      <span class="search-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" class="search-input" id="searchInput" placeholder="코드 / 프로젝트명 / 고객사 검색..." oninput="renderTable()">
+    </div>
+    <select class="filter-select" id="filterType" onchange="renderTable()">
+      <option value="">전체 유형</option>
+      <option value="SI">SI</option>
+      <option value="SM">SM</option>
+    </select>
+    <select class="filter-select" id="filterStatus" onchange="renderTable()">
+      <option value="">전체 상태</option>
+      <option value="진행중">진행중</option>
+      <option value="대기중">대기중</option>
+      <option value="검토중">검토중</option>
+      <option value="완료">완료</option>
+    </select>
+    <select class="filter-select" id="filterYear" onchange="renderTable()">
+      <option value="">전체 연도</option>
+      <option value="26">2026</option>
+      <option value="25">2025</option>
+      <option value="24">2024</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('code')"   id="th-code">PROJECT CODE</th>
+          <th onclick="sortBy('name')"   id="th-name">프로젝트명</th>
+          <th onclick="sortBy('client')" id="th-client">고객사</th>
+          <th onclick="sortBy('type')"   id="th-type">유형</th>
+          <th onclick="sortBy('status')" id="th-status">상태</th>
+          <th onclick="sortBy('progress')" id="th-progress">진행률</th>
+          <th onclick="sortBy('start')"  id="th-start">시작일</th>
+          <th onclick="sortBy('end')"    id="th-end">종료일</th>
+          <th>D-DAY</th>
+          <th>액션</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="table-footer">
+      <span id="footerCount">0 건</span>
+      <span id="footerTime"></span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">프로젝트 추가</span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-grid">
+      <!-- TYPE (drives code prefix) -->
+      <div class="form-group">
+        <label>유형</label>
+        <select id="fType" onchange="onTypeOrYearChange()">
+          <option value="SI">SI</option>
+          <option value="SM">SM</option>
+        </select>
+      </div>
+      <!-- YEAR -->
+      <div class="form-group">
+        <label>연도 (YY)</label>
+        <select id="fYear" onchange="onTypeOrYearChange()">
+          <option value="26">2026</option>
+          <option value="25">2025</option>
+          <option value="24">2024</option>
+        </select>
+      </div>
+      <!-- SEQ NUMBER -->
+      <div class="form-group full">
+        <label>일련번호 (4자리)</label>
+        <div class="seq-input-wrap">
+          <span class="seq-prefix" id="seqPrefix">SI-26-</span>
+          <input type="text" id="fSeq" class="seq-input" placeholder="0001" maxlength="4" oninput="onSeqInput(this)" onchange="onTypeOrYearChange()">
+        </div>
+        <div class="code-preview-wrap" style="margin-top:6px;">
+          <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">생성 코드:</span>
+          <span class="code-preview-badge" id="codePreview" style="color:var(--green);">SI-26-0000</span>
+        </div>
+      </div>
+      <!-- PROJECT NAME -->
+      <div class="form-group full">
+        <label>프로젝트명</label>
+        <input type="text" id="fName" placeholder="프로젝트명을 입력하세요">
+      </div>
+      <!-- CLIENT -->
+      <div class="form-group full">
+        <label>고객사</label>
+        <input type="text" id="fClient" placeholder="고객사명">
+      </div>
+      <!-- STATUS -->
+      <div class="form-group">
+        <label>상태</label>
+        <select id="fStatus">
+          <option value="진행중">진행중</option>
+          <option value="대기중">대기중</option>
+          <option value="검토중">검토중</option>
+          <option value="완료">완료</option>
+        </select>
+      </div>
+      <!-- PROGRESS -->
+      <div class="form-group">
+        <label>진행률 (%)</label>
+        <input type="number" id="fProgress" min="0" max="100" value="0" placeholder="0">
+      </div>
+      <!-- START -->
+      <div class="form-group">
+        <label>시작일</label>
+        <input type="date" id="fStart">
+      </div>
+      <!-- END -->
+      <div class="form-group">
+        <label>종료일</label>
+        <input type="date" id="fEnd">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveProject()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ====================================================
+// DATA
+// ====================================================
+let projects = [
+  { id:1, code:'SI-26-0001', type:'SI', year:'26', seq:'0001', name:'공공기관 디지털 전환 구축', client:'행정안전부', status:'진행중', progress:62, start:'2026-01-15', end:'2026-07-31' },
+  { id:2, code:'SI-26-0002', type:'SI', year:'26', seq:'0002', name:'금융 차세대 코어뱅킹 시스템', client:'K은행', status:'진행중', progress:38, start:'2026-02-01', end:'2026-12-31' },
+  { id:3, code:'SM-26-0001', type:'SM', year:'26', seq:'0001', name:'ERP 유지보수 운영', client:'현대제철', status:'진행중', progress:80, start:'2026-01-01', end:'2026-12-31' },
+  { id:4, code:'SI-26-0003', type:'SI', year:'26', seq:'0003', name:'스마트 팩토리 MES 구축', client:'삼성SDI', status:'검토중', progress:12, start:'2026-04-01', end:'2026-10-31' },
+  { id:5, code:'SM-26-0002', type:'SM', year:'26', seq:'0002', name:'그룹웨어 운영 유지보수', client:'LG화학', status:'진행중', progress:55, start:'2026-01-01', end:'2026-06-30' },
+  { id:6, code:'SI-25-0012', type:'SI', year:'25', seq:'0012', name:'물류 통합관리시스템 구축', client:'CJ대한통운', status:'완료', progress:100, start:'2025-03-01', end:'2025-12-31' },
+  { id:7, code:'SM-25-0005', type:'SM', year:'25', seq:'0005', name:'HR 시스템 운영 지원', client:'SK하이닉스', status:'완료', progress:100, start:'2025-01-01', end:'2025-12-31' },
+  { id:8, code:'SI-26-0004', type:'SI', year:'26', seq:'0004', name:'의료정보시스템 고도화', client:'서울아산병원', status:'대기중', progress:0, start:'2026-06-01', end:'2026-12-31' },
+  { id:9, code:'SM-26-0003', type:'SM', year:'26', seq:'0003', name:'클라우드 인프라 운영', client:'KT', status:'진행중', progress:70, start:'2026-01-01', end:'2026-12-31' },
+  { id:10, code:'SI-26-0005', type:'SI', year:'26', seq:'0005', name:'국방 정보시스템 통합', client:'국방부', status:'검토중', progress:5, start:'2026-05-01', end:'2027-04-30' },
+];
+
+let editId = null;
+let sortField = 'code';
+let sortDir = 'asc';
+let idCounter = 11;
+
+// ====================================================
+// INIT
+// ====================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('dateStamp').textContent =
+    now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+  document.getElementById('footerTime').textContent =
+    'Last updated: ' + now.toLocaleTimeString('ko-KR');
+  renderTable();
+  updateStats();
+});
+
+// ====================================================
+// MODAL — code auto-generation
+// ====================================================
+function onTypeOrYearChange() {
+  const type = document.getElementById('fType').value;
+  const year = document.getElementById('fYear').value;
+  const seq  = document.getElementById('fSeq').value.padStart(4,'0');
+  const prefix = type + '-' + year + '-';
+  document.getElementById('seqPrefix').textContent = prefix;
+  const fullCode = prefix + seq;
+  const preview  = document.getElementById('codePreview');
+  preview.textContent = fullCode;
+  preview.style.color = type === 'SI' ? 'var(--green)' : 'var(--purple)';
+}
+
+function onSeqInput(el) {
+  el.value = el.value.replace(/\D/g, '').slice(0, 4);
+  onTypeOrYearChange();
+}
+
+function buildCode() {
+  const type = document.getElementById('fType').value;
+  const year = document.getElementById('fYear').value;
+  const seq  = (document.getElementById('fSeq').value || '0').padStart(4, '0');
+  return { code: type + '-' + year + '-' + seq, seq };
+}
+
+// ====================================================
+// OPEN / CLOSE MODAL
+// ====================================================
+function openModal(id = null) {
+  editId = id;
+  document.getElementById('modalTitle').textContent = id ? '프로젝트 수정' : '프로젝트 추가';
+  if (id) {
+    const p = projects.find(x => x.id === id);
+    document.getElementById('fType').value     = p.type;
+    document.getElementById('fYear').value     = p.year || '26';
+    document.getElementById('fSeq').value      = p.seq  || '0000';
+    document.getElementById('fName').value     = p.name;
+    document.getElementById('fClient').value   = p.client;
+    document.getElementById('fStatus').value   = p.status;
+    document.getElementById('fProgress').value = p.progress;
+    document.getElementById('fStart').value    = p.start;
+    document.getElementById('fEnd').value      = p.end;
+  } else {
+    document.getElementById('fType').value     = 'SI';
+    document.getElementById('fYear').value     = '26';
+    document.getElementById('fSeq').value      = '';
+    document.getElementById('fName').value     = '';
+    document.getElementById('fClient').value   = '';
+    document.getElementById('fStatus').value   = '진행중';
+    document.getElementById('fProgress').value = 0;
+    document.getElementById('fStart').value    = '';
+    document.getElementById('fEnd').value      = '';
+  }
+  onTypeOrYearChange();
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editId = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === e.currentTarget) closeModal();
+}
+
+// ====================================================
+// SAVE
+// ====================================================
+function saveProject() {
+  const name   = document.getElementById('fName').value.trim();
+  const client = document.getElementById('fClient').value.trim();
+  const seqRaw = document.getElementById('fSeq').value.trim();
+  if (!name)   { showToast('프로젝트명을 입력하세요.', 'error'); return; }
+  if (!client) { showToast('고객사를 입력하세요.', 'error'); return; }
+  if (!seqRaw || !/^\d{1,4}$/.test(seqRaw)) { showToast('일련번호(4자리 숫자)를 입력하세요.', 'error'); return; }
+
+  const type     = document.getElementById('fType').value;
+  const year     = document.getElementById('fYear').value;
+  const seq      = seqRaw.padStart(4, '0');
+  const code     = type + '-' + year + '-' + seq;
+
+  // Duplicate check (exclude self when editing)
+  const dup = projects.find(p => p.code === code && p.id !== editId);
+  if (dup) { showToast('이미 존재하는 프로젝트 코드입니다: ' + code, 'error'); return; }
+
+  const proj = {
+    id:       editId || idCounter++,
+    code, type, year, seq,
+    name,
+    client,
+    status:   document.getElementById('fStatus').value,
+    progress: parseInt(document.getElementById('fProgress').value) || 0,
+    start:    document.getElementById('fStart').value,
+    end:      document.getElementById('fEnd').value,
+  };
+
+  if (editId) {
+    projects = projects.map(p => p.id === editId ? proj : p);
+    showToast('프로젝트가 수정되었습니다.', 'success');
+  } else {
+    projects.push(proj);
+    showToast('프로젝트가 추가되었습니다.', 'success');
+  }
+  closeModal();
+  renderTable();
+  updateStats();
+}
+
+// ====================================================
+// DELETE
+// ====================================================
+function deleteProject(id) {
+  const p = projects.find(x => x.id === id);
+  if (!confirm('[' + p.code + '] ' + p.name + '\n\n이 프로젝트를 삭제하시겠습니까?')) return;
+  projects = projects.filter(x => x.id !== id);
+  renderTable();
+  updateStats();
+  showToast('프로젝트가 삭제되었습니다.', 'info');
+}
+
+// ====================================================
+// SORT
+// ====================================================
+function sortBy(field) {
+  if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortField = field; sortDir = 'asc'; }
+  document.querySelectorAll('th').forEach(th => th.className = '');
+  const el = document.getElementById('th-' + field);
+  if (el) el.className = 'sort-' + sortDir;
+  renderTable();
+}
+
+// ====================================================
+// FILTER + RENDER
+// ====================================================
+function getFiltered() {
+  const q      = document.getElementById('searchInput').value.toLowerCase();
+  const fType  = document.getElementById('filterType').value;
+  const fStat  = document.getElementById('filterStatus').value;
+  const fYear  = document.getElementById('filterYear').value;
+
+  return projects.filter(p => {
+    const matchQ    = !q || p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || p.client.toLowerCase().includes(q);
+    const matchType = !fType  || p.type   === fType;
+    const matchStat = !fStat  || p.status === fStat;
+    const matchYear = !fYear  || (p.year || '') === fYear;
+    return matchQ && matchType && matchStat && matchYear;
+  }).sort((a, b) => {
+    let va = a[sortField] ?? '';
+    let vb = b[sortField] ?? '';
+    if (sortField === 'progress') { va = +va; vb = +vb; }
+    const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+}
+
+function dday(endStr, status) {
+  if (status === '완료') return { label:'완료', cls:'dday-done' };
+  if (!endStr) return { label:'-', cls:'dday-done' };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const end   = new Date(endStr);
+  const diff  = Math.ceil((end - today) / 86400000);
+  if (diff < 0)  return { label:'D+' + Math.abs(diff), cls:'dday-urgent' };
+  if (diff === 0) return { label:'D-DAY', cls:'dday-urgent' };
+  if (diff <= 14) return { label:'D-' + diff, cls:'dday-near' };
+  return { label:'D-' + diff, cls:'dday-ok' };
+}
+
+function progressClass(v) {
+  if (v < 30) return 'low';
+  if (v < 70) return 'mid';
+  return 'high';
+}
+
+function statusDot(s) {
+  const map = { '진행중':'dot-active', '대기중':'dot-wait', '검토중':'dot-review', '완료':'dot-done' };
+  return map[s] || 'dot-done';
+}
+
+function renderTable() {
+  const data = getFiltered();
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="10">// NO PROJECTS FOUND</td></tr>';
+    document.getElementById('footerCount').textContent = '0 건';
+    return;
+  }
+
+  data.forEach((p, i) => {
+    const dd  = dday(p.end, p.status);
+    const pct = Math.min(100, Math.max(0, p.progress));
+    const tr  = document.createElement('tr');
+    tr.style.animationDelay = (i * 0.035) + 's';
+    tr.innerHTML = `
+      <td>
+        <span class="code-cell code-${p.type.toLowerCase()}">${p.code}</span>
+      </td>
+      <td><span class="name-cell" title="${p.name}">${p.name}</span></td>
+      <td><span class="client-cell">${p.client}</span></td>
+      <td><span class="badge badge-${p.type.toLowerCase()}">${p.type}</span></td>
+      <td>
+        <span class="status-dot">
+          <span class="dot ${statusDot(p.status)}"></span>
+          ${p.status}
+        </span>
+      </td>
+      <td>
+        <div class="progress-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill ${progressClass(pct)}" style="width:${pct}%"></div>
+          </div>
+          <span class="progress-pct">${pct}%</span>
+        </div>
+      </td>
+      <td class="date-cell">${p.start || '-'}</td>
+      <td class="date-cell">${p.end   || '-'}</td>
+      <td><span class="dday ${dd.cls}">${dd.label}</span></td>
+      <td>
+        <div class="actions">
+          <button class="icon-btn edit" onclick="openModal(${p.id})" title="수정">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-btn del" onclick="deleteProject(${p.id})" title="삭제">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('footerCount').textContent = data.length + ' 건 / 전체 ' + projects.length + ' 건';
+}
+
+// ====================================================
+// STATS
+// ====================================================
+function updateStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const urgent = projects.filter(p => {
+    if (!p.end || p.status === '완료') return false;
+    const diff = Math.ceil((new Date(p.end) - today) / 86400000);
+    return diff >= 0 && diff <= 14;
+  });
+  document.getElementById('statTotal').textContent  = projects.length;
+  document.getElementById('statSI').textContent     = projects.filter(p => p.type === 'SI').length;
+  document.getElementById('statSM').textContent     = projects.filter(p => p.type === 'SM').length;
+  document.getElementById('statDone').textContent   = projects.filter(p => p.status === '완료').length;
+  document.getElementById('statUrgent').textContent = urgent.length;
+}
+
+// ====================================================
+// CSV EXPORT
+// ====================================================
+function exportCSV() {
+  const headers = ['프로젝트코드','프로젝트명','고객사','유형','상태','진행률(%)','시작일','종료일'];
+  const rows = projects.map(p => [p.code, p.name, p.client, p.type, p.status, p.progress, p.start, p.end].join(','));
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'SI-SM_Projects_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('CSV 파일이 다운로드되었습니다.', 'success');
+}
+
+// ====================================================
+// TOAST
+// ====================================================
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+</script>
+</body>
+</html>
