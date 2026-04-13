@@ -3,828 +3,751 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SI-SM 프로젝트 관리</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>VRB 프로젝트 현황 관리</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --surface2: #181c24;
-    --border: #222836;
-    --border2: #2e3a50;
-    --accent: #00d4ff;
-    --accent2: #0099cc;
-    --green: #00e676;
-    --orange: #ff9100;
-    --red: #ff3d57;
-    --yellow: #ffd740;
-    --purple: #b388ff;
-    --text: #e8edf5;
-    --text2: #7a8ba0;
-    --text3: #4a5a6e;
-    --mono: 'JetBrains Mono', monospace;
-    --sans: 'Noto Sans KR', sans-serif;
+    --bg: #f0f2fc;
+    --surface: #ffffff;
+    --surface2: #f7f8ff;
+    --border: #e2e6f3;
+    --border2: #d0d5ee;
+    --text-primary: #1a1f3c;
+    --text-secondary: #4a5080;
+    --text-muted: #8b91b5;
+    --accent: #3b5bdb;
+    --accent-light: #e8edff;
+    --accent-hover: #2f4ac7;
+    --success: #2f9e44;
+    --success-light: #ebfbee;
+    --warning: #e67700;
+    --warning-light: #fff3cd;
+    --danger: #c92a2a;
+    --danger-light: #ffe0e0;
+    --info: #1971c2;
+    --info-light: #e7f5ff;
+    --shadow-sm: 0 1px 3px rgba(59,91,219,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(59,91,219,0.10), 0 2px 6px rgba(0,0,0,0.05);
+    --shadow-lg: 0 12px 40px rgba(59,91,219,0.15), 0 4px 12px rgba(0,0,0,0.07);
+    --radius: 10px;
+    --radius-sm: 6px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
+    font-family: 'Noto Sans KR', sans-serif;
     background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
+    color: var(--text-primary);
+    font-size: 15px;
     min-height: 100vh;
-    overflow-x: hidden;
   }
-
-  /* Grid noise overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.015) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 24px 28px;
-  }
-
   /* HEADER */
   .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
   }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .logo-mark {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: 13px;
-    color: #000;
-    letter-spacing: -0.5px;
-    flex-shrink: 0;
-  }
-
-  .header-title h1 {
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.5px;
-  }
-
-  .header-title p {
-    font-size: 12px;
-    color: var(--text2);
-    margin-top: 2px;
-    font-family: var(--mono);
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: all 0.18s ease;
-    font-family: var(--sans);
-    white-space: nowrap;
-  }
-
-  .btn-primary {
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .header-logo-badge {
     background: var(--accent);
-    color: #000;
-    font-weight: 700;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 1px;
   }
-  .btn-primary:hover { background: #00eeff; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,212,255,0.3); }
-
-  .btn-ghost {
-    background: var(--surface2);
-    color: var(--text2);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
-
-  .btn-danger {
-    background: rgba(255,61,87,0.12);
-    color: var(--red);
-    border: 1px solid rgba(255,61,87,0.2);
-  }
-  .btn-danger:hover { background: rgba(255,61,87,0.22); }
-
+  .header-title { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
+  .header-date { font-size: 13px; color: var(--text-muted); }
+  /* MAIN */
+  .main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
   /* STAT CARDS */
-  .stats {
+  .stats-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 14px;
     margin-bottom: 24px;
   }
-
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius);
     padding: 16px 18px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: var(--shadow-sm);
   }
-  .stat-card:hover { border-color: var(--border2); }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .stat-card.all::before { background: var(--accent); }
-  .stat-card.si::before { background: var(--green); }
-  .stat-card.sm::before { background: var(--purple); }
-  .stat-card.done::before { background: var(--text3); }
-  .stat-card.urgent::before { background: var(--red); }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text2);
-    font-family: var(--mono);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-family: var(--mono);
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .stat-card.all .stat-value { color: var(--accent); }
-  .stat-card.si .stat-value { color: var(--green); }
-  .stat-card.sm .stat-value { color: var(--purple); }
-  .stat-card.done .stat-value { color: var(--text2); }
-  .stat-card.urgent .stat-value { color: var(--red); }
-
-  /* FILTERS */
-  .filters {
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+  .stat-card.active { border-color: var(--accent); background: var(--accent-light); box-shadow: var(--shadow-md); }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+  .stat-card.active .stat-value { color: var(--accent); }
+  /* TOOLBAR */
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
     flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
   }
-
-  .search-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 240px;
-    max-width: 420px;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text3);
-    font-size: 14px;
-  }
-
+  .search-wrap { position: relative; flex: 1; min-width: 220px; }
+  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
   .search-input {
     width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
     padding: 9px 12px 9px 36px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: var(--sans);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface2);
+    transition: border-color 0.15s;
     outline: none;
-    transition: border-color 0.18s;
   }
-  .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--text3); }
-
-  .filter-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+  .search-input:focus { border-color: var(--accent); background: #fff; }
+  select.filter-select {
     padding: 9px 12px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: var(--sans);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface2);
     outline: none;
     cursor: pointer;
-    transition: border-color 0.18s;
-    appearance: none;
-    padding-right: 32px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%234a5a6e'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
+    transition: border-color 0.15s;
+    min-width: 130px;
   }
-  .filter-select:focus { border-color: var(--accent); }
-
+  select.filter-select:focus { border-color: var(--accent); }
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,91,219,0.3); }
+  .btn-secondary { background: var(--surface2); color: var(--text-secondary); border: 1px solid var(--border2); }
+  .btn-secondary:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #26803a; transform: translateY(-1px); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #a82222; transform: translateY(-1px); }
+  .btn-warning { background: var(--warning); color: #fff; }
+  .btn-warning:hover { background: #c45e00; transform: translateY(-1px); }
+  /* SORT */
+  thead th.sortable { cursor: pointer; user-select: none; }
+  thead th.sortable:hover { background: var(--accent-light); color: var(--accent); }
+  thead th.sort-active { color: var(--accent); background: var(--accent-light); }
+  .sort-icon { display: inline-flex; flex-direction: column; margin-left: 5px; vertical-align: middle; gap: 1px; }
+  .sort-icon .arrow-up, .sort-icon .arrow-down {
+    width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; opacity: 0.3;
+  }
+  .sort-icon .arrow-up { border-bottom: 5px solid currentColor; }
+  .sort-icon .arrow-down { border-top: 5px solid currentColor; }
+  thead th.sort-active.sort-asc .arrow-up { opacity: 1; }
+  thead th.sort-active.sort-desc .arrow-down { opacity: 1; }
   /* TABLE */
   .table-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    overflow-x: auto;
   }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 1100px;
-  }
-
-  thead tr {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border2);
-  }
-
-  th {
-    padding: 12px 14px;
-    text-align: left;
-    font-size: 11px;
-    font-family: var(--mono);
-    font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.15s;
-  }
-  th:hover { color: var(--accent); }
-  th.sort-asc::after { content: ' ^'; color: var(--accent); }
-  th.sort-desc::after { content: ' v'; color: var(--accent); }
-
-  tbody tr {
+  .table-header {
+    padding: 14px 20px;
     border-bottom: 1px solid var(--border);
-    transition: background 0.12s;
-    animation: rowIn 0.3s ease both;
-  }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(0,212,255,0.035); }
-
-  @keyframes rowIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  td {
-    padding: 13px 14px;
-    font-size: 13px;
-    vertical-align: middle;
-    white-space: nowrap;
-  }
-
-  /* PROJECT CODE cell */
-  .code-cell {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-  .code-si { color: var(--green); }
-  .code-sm { color: var(--purple); }
-
-  /* PROJECT NAME cell */
-  .name-cell {
-    font-weight: 500;
-    color: var(--text);
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* CLIENT */
-  .client-cell { color: var(--text2); font-size: 12px; }
-
-  /* TYPE BADGE */
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-  .badge-si {
-    background: rgba(0,230,118,0.1);
-    color: var(--green);
-    border: 1px solid rgba(0,230,118,0.25);
-  }
-  .badge-sm {
-    background: rgba(179,136,255,0.1);
-    color: var(--purple);
-    border: 1px solid rgba(179,136,255,0.25);
-  }
-
-  /* STATUS */
-  .status-dot {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-  }
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .dot-active { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.8s infinite; }
-  .dot-wait   { background: var(--yellow); }
-  .dot-review { background: var(--orange); }
-  .dot-done   { background: var(--text3); }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
-  }
-
-  /* PROGRESS */
-  .progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 110px;
-  }
-  .progress-bar {
-    flex: 1;
-    height: 5px;
-    background: var(--border2);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
-  .progress-fill.low  { background: var(--red); }
-  .progress-fill.mid  { background: var(--orange); }
-  .progress-fill.high { background: var(--green); }
-
-  .progress-pct {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text2);
-    width: 32px;
-    text-align: right;
-  }
-
-  /* D-DAY */
-  .dday {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 700;
-    text-align: right;
-    padding: 2px 7px;
-    border-radius: 4px;
-    display: inline-block;
-  }
-  .dday-urgent { color: var(--red); background: rgba(255,61,87,0.1); }
-  .dday-near   { color: var(--orange); background: rgba(255,145,0,0.1); }
-  .dday-ok     { color: var(--green); background: rgba(0,230,118,0.1); }
-  .dday-done   { color: var(--text3); background: rgba(74,90,110,0.1); }
-
-  /* DATE */
-  .date-cell { font-family: var(--mono); font-size: 12px; color: var(--text2); }
-
-  /* ACTIONS */
-  .actions { display: flex; gap: 6px; }
-  .icon-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    color: var(--text2);
-    font-size: 14px;
-  }
-  .icon-btn:hover.edit  { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.07); }
-  .icon-btn:hover.del   { border-color: var(--red);   color: var(--red);   background: rgba(255,61,87,0.07); }
-
-  /* EMPTY */
-  .empty-row td {
-    text-align: center;
-    padding: 60px;
-    color: var(--text3);
-    font-family: var(--mono);
-    font-size: 13px;
-  }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.72);
-    backdrop-filter: blur(6px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.22s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 14px;
-    padding: 32px;
-    width: 540px;
-    max-width: 95vw;
-    transform: translateY(20px) scale(0.97);
-    transition: transform 0.22s ease;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
-
-  .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 26px;
+    background: var(--surface2);
   }
-  .modal-title {
-    font-family: var(--mono);
-    font-size: 16px;
+  .table-count { font-size: 14px; color: var(--text-secondary); }
+  .table-count strong { color: var(--accent); font-weight: 700; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface2);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 2px solid var(--border2);
+    white-space: nowrap;
   }
-  .modal-close {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: transparent;
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--accent-light); }
+  tbody td { padding: 11px 14px; font-size: 14px; color: var(--text-primary); vertical-align: middle; }
+  .code-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 4px;
     cursor: pointer;
-    color: var(--text2);
-    font-size: 18px;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .code-badge:hover { background: var(--accent); color: #fff; }
+  .project-name-link {
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.15s;
+    font-size: 14px;
+  }
+  .project-name-link:hover { color: var(--accent); text-decoration: underline; }
+  /* STATUS BADGES */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-가결 { background: var(--success-light); color: var(--success); }
+  .badge-부결 { background: var(--danger-light); color: var(--danger); }
+  .badge-조건부 { background: var(--warning-light); color: var(--warning); }
+  .badge-보류 { background: #f3f0ff; color: #7048e8; }
+  .badge-미정 { background: #f1f3f5; color: #868e96; }
+  .badge-사전 { background: #e3fafc; color: #0c8599; }
+  .badge-제안 { background: #fff0f6; color: #c2255c; }
+  /* DATE */
+  .date-text { font-size: 13px; color: var(--text-secondary); white-space: nowrap; font-family: 'JetBrains Mono', monospace; }
+  /* ACTION BUTTONS */
+  .action-btn {
+    padding: 5px 11px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.13s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .action-edit { background: var(--accent-light); color: var(--accent); border-color: #c5d0fa; }
+  .action-edit:hover { background: var(--accent); color: #fff; }
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(20,25,60,0.35);
+    backdrop-filter: blur(4px);
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
   }
-  .modal-close:hover { border-color: var(--red); color: var(--red); }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.2s;
   }
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .form-group.full { grid-column: 1 / -1; }
-
-  label {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text2);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-  }
-
-  /* CODE PREVIEW inside modal */
-  .code-preview-wrap {
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
   }
-  .code-preview-badge {
-    font-family: var(--mono);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 4px 0;
-  }
-
-  input, select, textarea {
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+  .modal-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: none;
     background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.13s;
+  }
+  .modal-close:hover { background: var(--danger-light); color: var(--danger); }
+  .modal-body { padding: 22px 26px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .form-control {
     padding: 9px 12px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: var(--sans);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface2);
     outline: none;
-    transition: border-color 0.18s;
-    width: 100%;
+    transition: border-color 0.15s;
   }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  input::placeholder { color: var(--text3); }
-
-  .seq-input-wrap {
-    position: relative;
-  }
-  .seq-prefix {
-    position: absolute;
-    left: 11px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text2);
-    pointer-events: none;
-    font-weight: 600;
-  }
-  .seq-input {
-    padding-left: 82px !important;
-    font-family: var(--mono) !important;
-    letter-spacing: 1px;
-  }
-
+  .form-control:focus { border-color: var(--accent); background: #fff; }
+  textarea.form-control { resize: vertical; min-height: 80px; }
   .modal-footer {
+    padding: 16px 26px 22px;
     display: flex;
-    gap: 10px;
     justify-content: flex-end;
-    margin-top: 26px;
-    padding-top: 20px;
+    gap: 10px;
     border-top: 1px solid var(--border);
   }
-
+  /* DETAIL MODAL */
+  .detail-modal { max-width: 640px; }
+  .detail-hero {
+    background: linear-gradient(135deg, #3b5bdb 0%, #2f4ac7 100%);
+    padding: 26px 28px 22px;
+    border-radius: 14px 14px 0 0;
+    color: #fff;
+  }
+  .detail-hero-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .detail-hero-title { font-size: 19px; font-weight: 700; line-height: 1.4; margin-bottom: 14px; }
+  .detail-hero-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .detail-hero-badge { background: rgba(255,255,255,0.2); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .detail-body { padding: 24px 28px; }
+  .detail-section-title {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+  .detail-field-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+  .detail-field-value { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+  .detail-field-value.mono { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+  .detail-note {
+    background: var(--warning-light);
+    border-left: 3px solid var(--warning);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 16px;
+    margin-top: 4px;
+    font-size: 15px;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+  .detail-note-empty { color: var(--text-muted); font-size: 14px; font-style: italic; }
+  /* EMPTY STATE */
+  .empty-state { padding: 60px 20px; text-align: center; color: var(--text-muted); }
+  .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state-text { font-size: 15px; }
+  /* DELETE CONFIRM MODAL */
+  .confirm-modal { max-width: 420px; }
+  .confirm-body { padding: 28px 26px; text-align: center; }
+  .confirm-icon {
+    width: 56px; height: 56px;
+    background: var(--danger-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--danger);
+  }
+  .confirm-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .confirm-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .confirm-count {
+    display: inline-block;
+    background: var(--danger-light);
+    color: var(--danger);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 0 2px;
+  }
+  /* EXCEL UPLOAD MODAL */
+  .upload-modal { max-width: 820px; }
+  .drop-zone {
+    border: 2px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: var(--surface2);
+    margin-bottom: 20px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-light); }
+  .drop-zone-icon { color: var(--text-muted); margin-bottom: 10px; }
+  .drop-zone-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .drop-zone-sub { font-size: 13px; color: var(--text-muted); }
+  .drop-zone-accent { color: var(--accent); font-weight: 600; }
+  /* MAPPING TABLE */
+  .mapping-section { margin-bottom: 20px; }
+  .mapping-title {
+    font-size: 12px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .mapping-grid { display: grid; grid-template-columns: 1fr 20px 1fr; gap: 8px 6px; align-items: center; }
+  .mapping-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .mapping-arrow { text-align: center; color: var(--text-muted); font-size: 14px; }
+  .mapping-select {
+    padding: 7px 10px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    background: var(--surface2);
+    outline: none;
+    cursor: pointer;
+  }
+  .mapping-select:focus { border-color: var(--accent); }
+  /* PREVIEW TABLE */
+  .preview-section { margin-bottom: 4px; }
+  .preview-scroll { max-height: 260px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .preview-table th {
+    background: var(--surface2); padding: 8px 10px;
+    text-align: left; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border2); white-space: nowrap; position: sticky; top: 0;
+  }
+  .preview-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+  .preview-table tr.row-new td { background: #f0fff4; }
+  .preview-table tr.row-new:hover td { background: #dcffe8; }
+  .preview-row-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 700;
+  }
+  .tag-new { background: var(--success-light); color: var(--success); }
+  .preview-empty { padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px; }
+  .preview-count { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  .preview-count strong { color: var(--success); }
   /* TOAST */
   .toast {
     position: fixed;
-    bottom: 28px;
-    right: 28px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
+    bottom: 28px; right: 28px;
+    background: var(--text-primary);
+    color: #fff;
     padding: 12px 20px;
-    font-size: 13px;
-    color: var(--text);
-    z-index: 2000;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
     transform: translateY(20px);
     opacity: 0;
-    transition: all 0.25s ease;
-    font-family: var(--sans);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transition: all 0.25s;
+    pointer-events: none;
   }
   .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { border-left: 3px solid var(--green); }
-  .toast.error   { border-left: 3px solid var(--red); }
-  .toast.info    { border-left: 3px solid var(--accent); }
-
-  .table-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: var(--surface2);
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--text2);
+  .toast.toast-success { background: var(--success); }
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .main { padding: 16px; }
   }
-
-  /* scrollbar */
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .header { padding: 0 16px; }
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+  /* SCROLLBAR */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  @media (max-width: 900px) {
-    .stats { grid-template-columns: repeat(3, 1fr); }
-    .header { flex-direction: column; align-items: flex-start; gap: 12px; }
-  }
-  @media (max-width: 600px) {
-    .stats { grid-template-columns: 1fr 1fr; }
-    .container { padding: 16px; }
-  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-left">
-      <div class="logo-mark">PM</div>
-      <div class="header-title">
-        <h1>SI-SM PROJECT MANAGER</h1>
-        <p id="dateStamp">-- Loading --</p>
-      </div>
-    </div>
-    <div class="header-right">
-      <button class="btn btn-ghost" onclick="exportCSV()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        CSV 내보내기
-      </button>
-      <button class="btn btn-primary" onclick="openModal()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        프로젝트 추가
-      </button>
-    </div>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    <span class="header-logo-badge">VRB</span>
+    <span class="header-title">프로젝트 현황 관리</span>
   </div>
+  <span class="header-date" id="headerDate"></span>
+</header>
 
+<!-- MAIN -->
+<div class="main">
   <!-- STATS -->
-  <div class="stats">
-    <div class="stat-card all">
-      <div class="stat-label">TOTAL</div>
-      <div class="stat-value" id="statTotal">0</div>
-    </div>
-    <div class="stat-card si">
-      <div class="stat-label">SI</div>
-      <div class="stat-value" id="statSI">0</div>
-    </div>
-    <div class="stat-card sm">
-      <div class="stat-label">SM</div>
-      <div class="stat-value" id="statSM">0</div>
-    </div>
-    <div class="stat-card done">
-      <div class="stat-label">DONE</div>
-      <div class="stat-value" id="statDone">0</div>
-    </div>
-    <div class="stat-card urgent">
-      <div class="stat-label">URGENT</div>
-      <div class="stat-value" id="statUrgent">0</div>
-    </div>
-  </div>
+  <div class="stats-grid" id="statsGrid"></div>
 
-  <!-- FILTERS -->
-  <div class="filters">
+  <!-- TOOLBAR -->
+  <div class="toolbar">
     <div class="search-wrap">
-      <span class="search-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </span>
-      <input type="text" class="search-input" id="searchInput" placeholder="코드 / 프로젝트명 / 고객사 검색..." oninput="renderTable()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="searchInput" type="text" placeholder="프로젝트 코드, 프로젝트명, 고객사 검색...">
     </div>
-    <select class="filter-select" id="filterType" onchange="renderTable()">
-      <option value="">전체 유형</option>
-      <option value="SI">SI</option>
-      <option value="SM">SM</option>
-    </select>
-    <select class="filter-select" id="filterStatus" onchange="renderTable()">
+    <select class="filter-select" id="filterStatus">
       <option value="">전체 상태</option>
-      <option value="진행중">진행중</option>
-      <option value="대기중">대기중</option>
-      <option value="검토중">검토중</option>
-      <option value="완료">완료</option>
+      <option value="가결">가결</option>
+      <option value="조건부">조건부</option>
+      <option value="보류">보류</option>
+      <option value="부결">부결</option>
+      <option value="미정">미정</option>
     </select>
-    <select class="filter-select" id="filterYear" onchange="renderTable()">
-      <option value="">전체 연도</option>
-      <option value="26">2026</option>
-      <option value="25">2025</option>
-      <option value="24">2024</option>
+    <select class="filter-select" id="filterReview">
+      <option value="">전체 검토구분</option>
+      <option value="사전">사전</option>
+      <option value="제안">제안</option>
     </select>
+    <select class="filter-select" id="filterSales">
+      <option value="">전체 담당영업</option>
+    </select>
+    <button class="btn btn-success" onclick="exportExcel()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      엑셀 내보내기
+    </button>
+    <button class="btn btn-warning" onclick="openUploadModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      엑셀 업로드
+    </button>
+    <button class="btn btn-danger" onclick="openDeleteAllModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      전체 삭제
+    </button>
+    <button class="btn btn-primary" onclick="openAddModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      신규 등록
+    </button>
   </div>
 
   <!-- TABLE -->
   <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th onclick="sortBy('code')"   id="th-code">PROJECT CODE</th>
-          <th onclick="sortBy('name')"   id="th-name">프로젝트명</th>
-          <th onclick="sortBy('client')" id="th-client">고객사</th>
-          <th onclick="sortBy('type')"   id="th-type">유형</th>
-          <th onclick="sortBy('status')" id="th-status">상태</th>
-          <th onclick="sortBy('progress')" id="th-progress">진행률</th>
-          <th onclick="sortBy('start')"  id="th-start">시작일</th>
-          <th onclick="sortBy('end')"    id="th-end">종료일</th>
-          <th>D-DAY</th>
-          <th>액션</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-    <div class="table-footer">
-      <span id="footerCount">0 건</span>
-      <span id="footerTime"></span>
+    <div class="table-header">
+      <span class="table-count">총 <strong id="countDisplay">0</strong>건</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="formModal" onclick="closeFormModalOutside(event)">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="modalTitle">프로젝트 추가</span>
-      <button class="modal-close" onclick="closeModal()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <span class="modal-title" id="formModalTitle">신규 등록</span>
+      <button class="modal-close" onclick="closeFormModal()">x</button>
     </div>
-    <div class="form-grid">
-      <!-- TYPE (drives code prefix) -->
-      <div class="form-group">
-        <label>유형</label>
-        <select id="fType" onchange="onTypeOrYearChange()">
-          <option value="SI">SI</option>
-          <option value="SM">SM</option>
-        </select>
-      </div>
-      <!-- YEAR -->
-      <div class="form-group">
-        <label>연도 (YY)</label>
-        <select id="fYear" onchange="onTypeOrYearChange()">
-          <option value="26">2026</option>
-          <option value="25">2025</option>
-          <option value="24">2024</option>
-        </select>
-      </div>
-      <!-- SEQ NUMBER -->
-      <div class="form-group full">
-        <label>일련번호 (4자리)</label>
-        <div class="seq-input-wrap">
-          <span class="seq-prefix" id="seqPrefix">SI-26-</span>
-          <input type="text" id="fSeq" class="seq-input" placeholder="0001" maxlength="4" oninput="onSeqInput(this)" onchange="onTypeOrYearChange()">
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">검토구분</label>
+          <select class="form-control" id="f_review">
+            <option value="사전">사전</option>
+            <option value="제안">제안</option>
+          </select>
         </div>
-        <div class="code-preview-wrap" style="margin-top:6px;">
-          <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">생성 코드:</span>
-          <span class="code-preview-badge" id="codePreview" style="color:var(--green);">SI-26-0000</span>
+        <div class="form-group">
+          <label class="form-label">검토일자</label>
+          <input class="form-control" id="f_date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">프로젝트 코드</label>
+          <input class="form-control" id="f_code" placeholder="예) SI-26-001">
         </div>
       </div>
-      <!-- PROJECT NAME -->
-      <div class="form-group full">
-        <label>프로젝트명</label>
-        <input type="text" id="fName" placeholder="프로젝트명을 입력하세요">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">프로젝트명</label>
+          <input class="form-control" id="f_name" placeholder="프로젝트명 입력">
+        </div>
       </div>
-      <!-- CLIENT -->
-      <div class="form-group full">
-        <label>고객사</label>
-        <input type="text" id="fClient" placeholder="고객사명">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">고객사</label>
+          <input class="form-control" id="f_client" placeholder="고객사명 입력">
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당영업</label>
+          <input class="form-control" id="f_sales" placeholder="이름 직책">
+        </div>
       </div>
-      <!-- STATUS -->
-      <div class="form-group">
-        <label>상태</label>
-        <select id="fStatus">
-          <option value="진행중">진행중</option>
-          <option value="대기중">대기중</option>
-          <option value="검토중">검토중</option>
-          <option value="완료">완료</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">검토결과</label>
+          <select class="form-control" id="f_result">
+            <option value="-">-</option>
+            <option value="가결">가결</option>
+            <option value="조건부">조건부</option>
+            <option value="보류">보류</option>
+            <option value="부결">부결</option>
+          </select>
+        </div>
       </div>
-      <!-- PROGRESS -->
-      <div class="form-group">
-        <label>진행률 (%)</label>
-        <input type="number" id="fProgress" min="0" max="100" value="0" placeholder="0">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">현재상태</label>
+          <select class="form-control" id="f_status">
+            <option value="미정">미정</option>
+            <option value="가결">가결</option>
+            <option value="조건부">조건부</option>
+            <option value="보류">보류</option>
+            <option value="부결">부결</option>
+          </select>
+        </div>
       </div>
-      <!-- START -->
-      <div class="form-group">
-        <label>시작일</label>
-        <input type="date" id="fStart">
-      </div>
-      <!-- END -->
-      <div class="form-group">
-        <label>종료일</label>
-        <input type="date" id="fEnd">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">비고</label>
+          <textarea class="form-control" id="f_note" placeholder="비고 사항 입력"></textarea>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-secondary" onclick="closeFormModal()">취소</button>
       <button class="btn btn-primary" onclick="saveProject()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="closeDetailModalOutside(event)">
+  <div class="modal detail-modal">
+    <div class="detail-hero">
+      <div class="detail-hero-code" id="d_code"></div>
+      <div class="detail-hero-title" id="d_name"></div>
+      <div class="detail-hero-badges" id="d_badges"></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section-title">기본 정보</div>
+      <div class="detail-grid">
+        <div class="detail-field">
+          <div class="detail-field-label">고객사</div>
+          <div class="detail-field-value" id="d_client"></div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">담당영업</div>
+          <div class="detail-field-value" id="d_sales"></div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">검토구분</div>
+          <div class="detail-field-value" id="d_review"></div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">검토일자</div>
+          <div class="detail-field-value mono" id="d_date"></div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">검토결과</div>
+          <div class="detail-field-value" id="d_result"></div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">현재상태</div>
+          <div class="detail-field-value" id="d_status"></div>
+        </div>
+      </div>
+      <div class="detail-section-title">비고</div>
+      <div id="d_note_wrap"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
+      <button class="btn btn-primary" id="d_editBtn">수정하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE ALL CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteAllModal" onclick="closeDeleteAllModalOutside(event)">
+  <div class="modal confirm-modal">
+    <div class="modal-header">
+      <span class="modal-title">전체 리스트 삭제</span>
+      <button class="modal-close" onclick="closeDeleteAllModal()">x</button>
+    </div>
+    <div class="confirm-body">
+      <div class="confirm-icon">
+        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <div class="confirm-title">정말 전체 삭제하시겠습니까?</div>
+      <div class="confirm-desc">
+        현재 등록된 <span class="confirm-count" id="deleteAllCount">0</span>건의 프로젝트가<br>
+        모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeDeleteAllModal()">취소</button>
+      <button class="btn btn-danger" onclick="confirmDeleteAll()">전체 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXCEL UPLOAD MODAL -->
+<div class="modal-overlay" id="uploadModal" onclick="closeUploadModalOutside(event)">
+  <div class="modal upload-modal">
+    <div class="modal-header">
+      <span class="modal-title">엑셀 파일 업로드</span>
+      <button class="modal-close" onclick="closeUploadModal()">x</button>
+    </div>
+    <div class="modal-body">
+      <!-- DROP ZONE -->
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('excelFileInput').click()">
+        <div class="drop-zone-icon">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-zone-title">클릭하거나 파일을 드래그해서 업로드</div>
+        <div class="drop-zone-sub"><span class="drop-zone-accent">.xlsx, .xls</span> 파일만 지원합니다</div>
+        <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+
+      <!-- MAPPING -->
+      <div class="mapping-section" id="mappingSection" style="display:none">
+        <div class="mapping-title">컬럼 매핑 설정</div>
+        <div class="mapping-grid" id="mappingGrid"></div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="preview-section" id="previewSection" style="display:none">
+        <div class="mapping-title">데이터 미리보기</div>
+        <div class="preview-count" id="previewCount"></div>
+        <div class="preview-scroll">
+          <table class="preview-table">
+            <thead id="previewHead"></thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeUploadModal()">취소</button>
+      <button class="btn btn-primary" id="uploadSaveBtn" onclick="saveUploadedData()" style="display:none">저장하기</button>
     </div>
   </div>
 </div>
@@ -833,319 +756,531 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ====================================================
-// DATA
-// ====================================================
-let projects = [
-  { id:1, code:'SI-26-0001', type:'SI', year:'26', seq:'0001', name:'공공기관 디지털 전환 구축', client:'행정안전부', status:'진행중', progress:62, start:'2026-01-15', end:'2026-07-31' },
-  { id:2, code:'SI-26-0002', type:'SI', year:'26', seq:'0002', name:'금융 차세대 코어뱅킹 시스템', client:'K은행', status:'진행중', progress:38, start:'2026-02-01', end:'2026-12-31' },
-  { id:3, code:'SM-26-0001', type:'SM', year:'26', seq:'0001', name:'ERP 유지보수 운영', client:'현대제철', status:'진행중', progress:80, start:'2026-01-01', end:'2026-12-31' },
-  { id:4, code:'SI-26-0003', type:'SI', year:'26', seq:'0003', name:'스마트 팩토리 MES 구축', client:'삼성SDI', status:'검토중', progress:12, start:'2026-04-01', end:'2026-10-31' },
-  { id:5, code:'SM-26-0002', type:'SM', year:'26', seq:'0002', name:'그룹웨어 운영 유지보수', client:'LG화학', status:'진행중', progress:55, start:'2026-01-01', end:'2026-06-30' },
-  { id:6, code:'SI-25-0012', type:'SI', year:'25', seq:'0012', name:'물류 통합관리시스템 구축', client:'CJ대한통운', status:'완료', progress:100, start:'2025-03-01', end:'2025-12-31' },
-  { id:7, code:'SM-25-0005', type:'SM', year:'25', seq:'0005', name:'HR 시스템 운영 지원', client:'SK하이닉스', status:'완료', progress:100, start:'2025-01-01', end:'2025-12-31' },
-  { id:8, code:'SI-26-0004', type:'SI', year:'26', seq:'0004', name:'의료정보시스템 고도화', client:'서울아산병원', status:'대기중', progress:0, start:'2026-06-01', end:'2026-12-31' },
-  { id:9, code:'SM-26-0003', type:'SM', year:'26', seq:'0003', name:'클라우드 인프라 운영', client:'KT', status:'진행중', progress:70, start:'2026-01-01', end:'2026-12-31' },
-  { id:10, code:'SI-26-0005', type:'SI', year:'26', seq:'0005', name:'국방 정보시스템 통합', client:'국방부', status:'검토중', progress:5, start:'2026-05-01', end:'2027-04-30' },
-];
+  // ── DATA ──────────────────────────────────────────────────
+  let projects = [
+    { id:1,  code:'SM-26-001', name:'기획재정부 정보시스템 위탁운영', client:'기획재정부',  review:'사전', date:'2026-01-08', sales:'윤성동 전무', result:'가결', status:'보류', note:'실주 필요' },
+    { id:2,  code:'SM-26-002', name:'국방과학연구소 정보체계 통합유지관리', client:'국방과학연구소', review:'사전', date:'2026-01-08', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:3,  code:'SM-26-003', name:'한국환경공단 정보시스템 통합 유지관리', client:'한국환경공단', review:'사전', date:'2026-01-08', sales:'정현철 이사', result:'조건부', status:'조건부', note:'주사업자와의 업무 분담 필요' },
+    { id:4,  code:'SM-26-004', name:'도로교통공단 정보시스템 유지관리', client:'도로교통공단', review:'사전', date:'2026-01-15', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:5,  code:'SM-26-005', name:'한국수력원자력 IT인프라 유지보수', client:'한국수력원자력', review:'사전', date:'2026-01-15', sales:'정현철 이사', result:'보류', status:'보류', note:'보안 요건 재검토 필요' },
+    { id:6,  code:'SM-26-006', name:'국민건강보험공단 시스템 운영', client:'국민건강보험공단', review:'사전', date:'2026-01-22', sales:'윤성동 전무', result:'가결', status:'가결', note:'' },
+    { id:7,  code:'SM-26-007', name:'한국철도공사 인프라 유지관리', client:'한국철도공사', review:'사전', date:'2026-01-22', sales:'권혁주 상무', result:'부결', status:'부결', note:'수익성 미달' },
+    { id:8,  code:'SM-26-008', name:'한국토지주택공사 통합유지관리', client:'한국토지주택공사', review:'사전', date:'2026-01-29', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:9,  code:'SM-26-009', name:'기상청 기상정보시스템 운영지원', client:'기상청', review:'제안', date:'2026-02-05', sales:'정현철 이사', result:'조건부', status:'조건부', note:'추가 인력 투입 조건' },
+    { id:10, code:'SM-26-010', name:'국세청 세금신고 시스템 유지관리', client:'국세청', review:'제안', date:'2026-02-05', sales:'윤성동 전무', result:'가결', status:'가결', note:'' },
+    { id:11, code:'SI-26-001', name:'자동차손해배상진흥원 경상환자 장기치료 시스템 구축', client:'자동차손해배상진흥원', review:'사전', date:'2026-01-10', sales:'노회만 수석', result:'가결', status:'가결', note:'' },
+    { id:12, code:'SI-26-002', name:'헌법재판소사무처 차세대 법률정보 시스템 구축', client:'헌법재판소사무처', review:'사전', date:'2026-01-10', sales:'윤성동 전무', result:'가결', status:'가결', note:'' },
+    { id:13, code:'SI-26-003', name:'한국지능정보사회진흥원 재난안전 AI데이터 구축', client:'한국지능정보사회진흥원', review:'사전', date:'2026-01-17', sales:'권혁주 상무', result:'-', status:'미정', note:'' },
+    { id:14, code:'SI-26-004', name:'한국연구재단 생성형 AI 기반 연구지원 시스템 구축', client:'한국연구재단', review:'사전', date:'2026-01-17', sales:'권혁주 상무', result:'-', status:'미정', note:'' },
+    { id:15, code:'SI-26-005', name:'행정안전부 정부행사관리시스템 구축', client:'행정안전부', review:'사전', date:'2026-01-24', sales:'권혁주 상무', result:'-', status:'미정', note:'' },
+    { id:16, code:'SI-26-006', name:'기획재정부 데이터플랫폼 구축', client:'기획재정부', review:'사전', date:'2026-01-24', sales:'윤성동 전무', result:'-', status:'미정', note:'' },
+    { id:17, code:'SI-26-007', name:'국토교통부 도로관리시스템 고도화', client:'국토교통부', review:'제안', date:'2026-01-31', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:18, code:'SI-26-008', name:'환경부 온실가스 통합관리시스템 구축', client:'환경부', review:'제안', date:'2026-01-31', sales:'정현철 이사', result:'조건부', status:'조건부', note:'클라우드 전환 방식 협의 필요' },
+    { id:19, code:'SI-26-009', name:'해양수산부 항만물류 디지털플랫폼 구축', client:'해양수산부', review:'제안', date:'2026-02-07', sales:'노회만 수석', result:'가결', status:'가결', note:'' },
+    { id:20, code:'SI-26-010', name:'과학기술정보통신부 연구개발 관리시스템 구축', client:'과학기술정보통신부', review:'제안', date:'2026-02-07', sales:'권혁주 상무', result:'보류', status:'보류', note:'예산 규모 재협의' },
+    { id:21, code:'SI-26-011', name:'문화체육관광부 문화유산 디지털아카이브 구축', client:'문화체육관광부', review:'제안', date:'2026-02-14', sales:'윤성동 전무', result:'가결', status:'가결', note:'' },
+    { id:22, code:'SI-26-012', name:'고용노동부 고용정보 통합플랫폼 구축', client:'고용노동부', review:'제안', date:'2026-02-14', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:23, code:'SI-26-013', name:'보건복지부 사회복지 통합정보시스템 고도화', client:'보건복지부', review:'사전', date:'2026-02-21', sales:'정현철 이사', result:'-', status:'미정', note:'' },
+    { id:24, code:'SI-26-014', name:'교육부 학생정보 통합관리시스템 구축', client:'교육부', review:'사전', date:'2026-02-21', sales:'노회만 수석', result:'-', status:'미정', note:'' },
+    { id:25, code:'SI-26-015', name:'국방부 인사관리시스템 차세대 구축', client:'국방부', review:'사전', date:'2026-02-28', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:26, code:'SI-26-016', name:'법무부 전자소송 통합플랫폼 구축', client:'법무부', review:'제안', date:'2026-02-28', sales:'윤성동 전무', result:'조건부', status:'조건부', note:'보안 인증 추가 요건' },
+    { id:27, code:'SI-26-017', name:'농림축산식품부 스마트팜 관리플랫폼 구축', client:'농림축산식품부', review:'제안', date:'2026-03-07', sales:'권혁주 상무', result:'가결', status:'가결', note:'' },
+    { id:28, code:'SI-26-018', name:'산업통상자원부 에너지정보 통합관리시스템', client:'산업통상자원부', review:'제안', date:'2026-03-07', sales:'정현철 이사', result:'부결', status:'부결', note:'경쟁사 대비 가격 경쟁력 부족' },
+    { id:29, code:'SI-26-019', name:'금융위원회 핀테크 지원시스템 구축', client:'금융위원회', review:'사전', date:'2026-03-14', sales:'노회만 수석', result:'-', status:'미정', note:'' },
+    { id:30, code:'SI-26-020', name:'중소벤처기업부 창업지원 통합플랫폼', client:'중소벤처기업부', review:'사전', date:'2026-03-14', sales:'이민혁 부장', result:'-', status:'미정', note:'' },
+    { id:31, code:'SI-26-021', name:'통일부 남북교류 정보관리시스템 구축', client:'통일부', review:'제안', date:'2026-03-21', sales:'윤성동 전무', result:'보류', status:'보류', note:'사업 추진 일정 불확실' },
+    { id:32, code:'SI-26-022', name:'외교부 영사행정 디지털화 시스템', client:'외교부', review:'제안', date:'2026-03-21', sales:'권혁주 상무', result:'가결', status:'가결', note:'' },
+    { id:33, code:'SI-26-023', name:'여성가족부 가족지원 통합서비스 플랫폼', client:'여성가족부', review:'사전', date:'2026-03-28', sales:'정현철 이사', result:'-', status:'미정', note:'' },
+    { id:34, code:'SI-26-024', name:'행정안전부 스마트시티 통합플랫폼 고도화', client:'행정안전부', review:'사전', date:'2026-03-28', sales:'노회만 수석', result:'-', status:'미정', note:'' },
+    { id:35, code:'SI-26-025', name:'국가보훈처 보훈정보 통합관리시스템', client:'국가보훈처', review:'제안', date:'2026-04-04', sales:'이민혁 부장', result:'가결', status:'가결', note:'' },
+    { id:36, code:'SI-26-026', name:'원자력안전위원회 방사선 모니터링 시스템', client:'원자력안전위원회', review:'제안', date:'2026-04-04', sales:'정현철 이사', result:'조건부', status:'조건부', note:'기술 검증 추가 필요' },
+    { id:37, code:'SI-26-027', name:'공정거래위원회 심사정보 디지털화', client:'공정거래위원회', review:'사전', date:'2026-04-11', sales:'윤성동 전무', result:'-', status:'미정', note:'' },
+    { id:38, code:'SI-26-028', name:'감사원 감사정보 통합관리 플랫폼', client:'감사원', review:'사전', date:'2026-04-11', sales:'권혁주 상무', result:'-', status:'미정', note:'' },
+  ];
 
-let editId = null;
-let sortField = 'code';
-let sortDir = 'asc';
-let idCounter = 11;
+  let editingId = null;
+  let activeStatusFilter = '';
 
-// ====================================================
-// INIT
-// ====================================================
-document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
-  document.getElementById('dateStamp').textContent =
-    now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
-  document.getElementById('footerTime').textContent =
-    'Last updated: ' + now.toLocaleTimeString('ko-KR');
-  renderTable();
-  updateStats();
-});
+  // ── SORT STATE ────────────────────────────────────────────
+  let sortCol = null;
+  let sortDir = 'asc';
 
-// ====================================================
-// MODAL — code auto-generation
-// ====================================================
-function onTypeOrYearChange() {
-  const type = document.getElementById('fType').value;
-  const year = document.getElementById('fYear').value;
-  const seq  = document.getElementById('fSeq').value.padStart(4,'0');
-  const prefix = type + '-' + year + '-';
-  document.getElementById('seqPrefix').textContent = prefix;
-  const fullCode = prefix + seq;
-  const preview  = document.getElementById('codePreview');
-  preview.textContent = fullCode;
-  preview.style.color = type === 'SI' ? 'var(--green)' : 'var(--purple)';
-}
+  const COLUMNS = [
+    { key: 'review',  label: '검토구분' },
+    { key: 'date',    label: '검토일자' },
+    { key: 'code',    label: '프로젝트 코드' },
+    { key: 'name',    label: '프로젝트명' },
+    { key: 'client',  label: '고객사' },
+    { key: 'sales',   label: '담당영업' },
+    { key: 'result',  label: '검토결과' },
+    { key: 'status',  label: '현재상태' },
+    { key: 'note',    label: '비고' },
+    { key: null,      label: '관리' },
+  ];
 
-function onSeqInput(el) {
-  el.value = el.value.replace(/\D/g, '').slice(0, 4);
-  onTypeOrYearChange();
-}
-
-function buildCode() {
-  const type = document.getElementById('fType').value;
-  const year = document.getElementById('fYear').value;
-  const seq  = (document.getElementById('fSeq').value || '0').padStart(4, '0');
-  return { code: type + '-' + year + '-' + seq, seq };
-}
-
-// ====================================================
-// OPEN / CLOSE MODAL
-// ====================================================
-function openModal(id = null) {
-  editId = id;
-  document.getElementById('modalTitle').textContent = id ? '프로젝트 수정' : '프로젝트 추가';
-  if (id) {
-    const p = projects.find(x => x.id === id);
-    document.getElementById('fType').value     = p.type;
-    document.getElementById('fYear').value     = p.year || '26';
-    document.getElementById('fSeq').value      = p.seq  || '0000';
-    document.getElementById('fName').value     = p.name;
-    document.getElementById('fClient').value   = p.client;
-    document.getElementById('fStatus').value   = p.status;
-    document.getElementById('fProgress').value = p.progress;
-    document.getElementById('fStart').value    = p.start;
-    document.getElementById('fEnd').value      = p.end;
-  } else {
-    document.getElementById('fType').value     = 'SI';
-    document.getElementById('fYear').value     = '26';
-    document.getElementById('fSeq').value      = '';
-    document.getElementById('fName').value     = '';
-    document.getElementById('fClient').value   = '';
-    document.getElementById('fStatus').value   = '진행중';
-    document.getElementById('fProgress').value = 0;
-    document.getElementById('fStart').value    = '';
-    document.getElementById('fEnd').value      = '';
+  // ── INIT ──────────────────────────────────────────────────
+  function init() {
+    document.getElementById('headerDate').textContent = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+    populateSalesFilter();
+    renderStats();
+    renderThead();
+    renderTable();
   }
-  onTypeOrYearChange();
-  document.getElementById('modalOverlay').classList.add('open');
-}
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  editId = null;
-}
+  function populateSalesFilter() {
+    const sales = [...new Set(projects.map(p => p.sales))].sort();
+    const sel = document.getElementById('filterSales');
+    sel.innerHTML = '<option value="">전체 담당영업</option>';
+    sales.forEach(s => {
+      const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o);
+    });
+  }
 
-function handleOverlayClick(e) {
-  if (e.target === e.currentTarget) closeModal();
-}
+  // ── STATS ─────────────────────────────────────────────────
+  function renderStats() {
+    const counts = { '전체': projects.length, '가결': 0, '조건부': 0, '보류': 0, '부결': 0, '미정': 0 };
+    projects.forEach(p => { if (counts[p.status] !== undefined) counts[p.status]++; });
+    const grid = document.getElementById('statsGrid');
+    grid.innerHTML = '';
+    Object.entries(counts).forEach(([label, val]) => {
+      const card = document.createElement('div');
+      card.className = 'stat-card' + (activeStatusFilter === (label === '전체' ? '' : label) ? ' active' : '');
+      card.innerHTML = '<div class="stat-label">' + label + '</div><div class="stat-value">' + val + '</div>';
+      card.onclick = () => {
+        activeStatusFilter = label === '전체' ? '' : label;
+        document.getElementById('filterStatus').value = activeStatusFilter;
+        renderStats();
+        renderTable();
+      };
+      grid.appendChild(card);
+    });
+  }
 
-// ====================================================
-// SAVE
-// ====================================================
-function saveProject() {
-  const name   = document.getElementById('fName').value.trim();
-  const client = document.getElementById('fClient').value.trim();
-  const seqRaw = document.getElementById('fSeq').value.trim();
-  if (!name)   { showToast('프로젝트명을 입력하세요.', 'error'); return; }
-  if (!client) { showToast('고객사를 입력하세요.', 'error'); return; }
-  if (!seqRaw || !/^\d{1,4}$/.test(seqRaw)) { showToast('일련번호(4자리 숫자)를 입력하세요.', 'error'); return; }
+  // ── THEAD ─────────────────────────────────────────────────
+  function renderThead() {
+    const thead = document.getElementById('tableHead');
+    const tr = document.createElement('tr');
+    COLUMNS.forEach(col => {
+      const th = document.createElement('th');
+      if (col.key) {
+        th.className = 'sortable' + (sortCol === col.key ? (' sort-active sort-' + sortDir) : '');
+        th.innerHTML = col.label + '<span class="sort-icon"><span class="arrow-up"></span><span class="arrow-down"></span></span>';
+        th.onclick = () => handleSort(col.key);
+      } else {
+        th.textContent = col.label;
+      }
+      tr.appendChild(th);
+    });
+    thead.innerHTML = '';
+    thead.appendChild(tr);
+  }
 
-  const type     = document.getElementById('fType').value;
-  const year     = document.getElementById('fYear').value;
-  const seq      = seqRaw.padStart(4, '0');
-  const code     = type + '-' + year + '-' + seq;
+  function handleSort(key) {
+    if (sortCol === key) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = key; sortDir = 'asc'; }
+    renderThead();
+    renderTable();
+  }
 
-  // Duplicate check (exclude self when editing)
-  const dup = projects.find(p => p.code === code && p.id !== editId);
-  if (dup) { showToast('이미 존재하는 프로젝트 코드입니다: ' + code, 'error'); return; }
+  function applySorting(list) {
+    if (!sortCol) return list;
+    return [...list].sort((a, b) => {
+      let av = a[sortCol] || ''; let bv = b[sortCol] || '';
+      if (sortCol === 'date') {
+        av = av.replace(/-/g, ''); bv = bv.replace(/-/g, '');
+        return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+      }
+      const an = parseFloat(av); const bn = parseFloat(bv);
+      if (!isNaN(an) && !isNaN(bn)) return sortDir === 'asc' ? an - bn : bn - an;
+      return sortDir === 'asc' ? av.localeCompare(bv, 'ko') : bv.localeCompare(av, 'ko');
+    });
+  }
 
-  const proj = {
-    id:       editId || idCounter++,
-    code, type, year, seq,
-    name,
-    client,
-    status:   document.getElementById('fStatus').value,
-    progress: parseInt(document.getElementById('fProgress').value) || 0,
-    start:    document.getElementById('fStart').value,
-    end:      document.getElementById('fEnd').value,
+  // ── TABLE ─────────────────────────────────────────────────
+  function getFiltered() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('filterStatus').value;
+    const review = document.getElementById('filterReview').value;
+    const sales = document.getElementById('filterSales').value;
+    return projects.filter(p => {
+      const matchQ = !q || p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || (p.client||'').toLowerCase().includes(q);
+      const matchS = !status || p.status === status;
+      const matchR = !review || p.review === review;
+      const matchSales = !sales || p.sales === sales;
+      return matchQ && matchS && matchR && matchSales;
+    });
+  }
+
+  function renderTable() {
+    const filtered = applySorting(getFiltered());
+    document.getElementById('countDisplay').textContent = filtered.length;
+    const tbody = document.getElementById('tableBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-state-icon">--</div><div class="empty-state-text">검색 결과가 없습니다.</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(p => `
+      <tr>
+        <td><span class="badge badge-${p.review}">${p.review}</span></td>
+        <td><span class="date-text">${formatDate(p.date)}</span></td>
+        <td><span class="code-badge" onclick="openDetailModal(${p.id})">${p.code}</span></td>
+        <td><span class="project-name-link" onclick="openDetailModal(${p.id})">${p.name}</span></td>
+        <td>${p.client || '-'}</td>
+        <td>${p.sales}</td>
+        <td><span class="badge badge-${p.result}">${p.result}</span></td>
+        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+        <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary)">${p.note || '-'}</td>
+        <td><button class="action-btn action-edit" onclick="openEditModal(${p.id})">수정</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function formatDate(d) {
+    if (!d) return '-';
+    const parts = d.split('-');
+    if (parts.length === 3) return parts[0] + '.' + parts[1] + '.' + parts[2];
+    return d;
+  }
+
+  // ── DETAIL MODAL ──────────────────────────────────────────
+  function openDetailModal(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('d_review').innerHTML = '<span class="badge badge-' + p.review + '">' + p.review + '</span>';
+    document.getElementById('d_date').textContent = formatDate(p.date);
+    document.getElementById('d_code').textContent = p.code;
+    document.getElementById('d_name').textContent = p.name;
+    document.getElementById('d_client').textContent = p.client || '-';
+    document.getElementById('d_sales').textContent = p.sales;
+    document.getElementById('d_result').innerHTML = '<span class="badge badge-' + p.result + '">' + p.result + '</span>';
+    document.getElementById('d_status').innerHTML = '<span class="badge badge-' + p.status + '">' + p.status + '</span>';
+    document.getElementById('d_badges').innerHTML =
+      '<span class="detail-hero-badge">' + p.review + '</span>' +
+      '<span class="detail-hero-badge">' + p.status + '</span>' +
+      (p.result !== '-' ? '<span class="detail-hero-badge">' + p.result + '</span>' : '');
+    const noteWrap = document.getElementById('d_note_wrap');
+    noteWrap.innerHTML = p.note
+      ? '<div class="detail-note">' + p.note + '</div>'
+      : '<div class="detail-note-empty">비고 사항 없음</div>';
+    document.getElementById('d_editBtn').onclick = () => { closeDetailModal(); openEditModal(id); };
+    document.getElementById('detailModal').classList.add('open');
+  }
+  function closeDetailModal() { document.getElementById('detailModal').classList.remove('open'); }
+  function closeDetailModalOutside(e) { if (e.target === document.getElementById('detailModal')) closeDetailModal(); }
+
+  // ── FORM MODAL ────────────────────────────────────────────
+  function openAddModal() {
+    editingId = null;
+    document.getElementById('formModalTitle').textContent = '신규 등록';
+    document.getElementById('f_code').value = '';
+    document.getElementById('f_name').value = '';
+    document.getElementById('f_client').value = '';
+    document.getElementById('f_review').value = '사전';
+    document.getElementById('f_date').value = '';
+    document.getElementById('f_sales').value = '';
+    document.getElementById('f_result').value = '-';
+    document.getElementById('f_status').value = '미정';
+    document.getElementById('f_note').value = '';
+    document.getElementById('formModal').classList.add('open');
+  }
+  function openEditModal(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('formModalTitle').textContent = '프로젝트 수정';
+    document.getElementById('f_code').value = p.code;
+    document.getElementById('f_name').value = p.name;
+    document.getElementById('f_client').value = p.client || '';
+    document.getElementById('f_review').value = p.review;
+    document.getElementById('f_date').value = p.date || '';
+    document.getElementById('f_sales').value = p.sales;
+    document.getElementById('f_result').value = p.result;
+    document.getElementById('f_status').value = p.status;
+    document.getElementById('f_note').value = p.note;
+    document.getElementById('formModal').classList.add('open');
+  }
+  function closeFormModal() { document.getElementById('formModal').classList.remove('open'); }
+  function closeFormModalOutside(e) { if (e.target === document.getElementById('formModal')) closeFormModal(); }
+
+  function saveProject() {
+    const data = {
+      code: document.getElementById('f_code').value.trim(),
+      name: document.getElementById('f_name').value.trim(),
+      client: document.getElementById('f_client').value.trim(),
+      review: document.getElementById('f_review').value,
+      date: document.getElementById('f_date').value,
+      sales: document.getElementById('f_sales').value.trim(),
+      result: document.getElementById('f_result').value,
+      status: document.getElementById('f_status').value,
+      note: document.getElementById('f_note').value.trim(),
+    };
+    if (!data.code || !data.name) { alert('프로젝트 코드와 프로젝트명은 필수입니다.'); return; }
+    if (editingId) {
+      const idx = projects.findIndex(x => x.id === editingId);
+      projects[idx] = { ...projects[idx], ...data };
+    } else {
+      projects.push({ id: Date.now(), ...data });
+    }
+    closeFormModal();
+    renderStats();
+    renderTable();
+  }
+
+  // ── EXCEL EXPORT ──────────────────────────────────────────
+  function exportExcel() {
+    const filtered = getFiltered();
+    const rows = filtered.map(p => ({
+      '프로젝트 코드': p.code,
+      '프로젝트명': p.name,
+      '고객사': p.client || '',
+      '검토구분': p.review,
+      '검토일자': p.date || '',
+      '담당영업사원': p.sales,
+      '검토결과': p.result,
+      '현재상태': p.status,
+      '비고': p.note,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'VRB 프로젝트 현황');
+    XLSX.writeFile(wb, 'VRB_프로젝트현황_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  }
+
+  // ── DELETE ALL ────────────────────────────────────────────
+  function openDeleteAllModal() {
+    document.getElementById('deleteAllCount').textContent = projects.length;
+    document.getElementById('deleteAllModal').classList.add('open');
+  }
+  function closeDeleteAllModal() { document.getElementById('deleteAllModal').classList.remove('open'); }
+  function closeDeleteAllModalOutside(e) { if (e.target === document.getElementById('deleteAllModal')) closeDeleteAllModal(); }
+  function confirmDeleteAll() {
+    projects = [];
+    closeDeleteAllModal();
+    renderStats();
+    renderTable();
+    populateSalesFilter();
+    showToast('전체 프로젝트가 삭제되었습니다.', 'danger');
+  }
+
+  // ── EXCEL UPLOAD ──────────────────────────────────────────
+  let uploadedRows = [];
+  let excelHeaders = [];
+
+  const FIELD_DEFS = [
+    { key: 'code',   label: '프로젝트 코드', required: true },
+    { key: 'name',   label: '프로젝트명',    required: true },
+    { key: 'client', label: '고객사',        required: false },
+    { key: 'review', label: '검토구분',      required: false },
+    { key: 'date',   label: '검토일자',      required: false },
+    { key: 'sales',  label: '담당영업',      required: false },
+    { key: 'result', label: '검토결과',      required: false },
+    { key: 'status', label: '현재상태',      required: false },
+    { key: 'note',   label: '비고',          required: false },
+  ];
+
+  // Auto-match keywords for each field
+  const FIELD_KEYWORDS = {
+    code:   ['코드', 'code'],
+    name:   ['프로젝트명', '사업명', 'name'],
+    client: ['고객사', '발주처', 'client'],
+    review: ['검토구분', '구분', 'vrb', 'review'],
+    date:   ['검토일자', '일자', '날짜', 'date'],
+    sales:  ['담당영업', '영업', '담당', 'sales'],
+    result: ['검토결과', '결과', 'result'],
+    status: ['현재상태', '상태', 'status'],
+    note:   ['비고', '메모', 'note', 'remark'],
   };
 
-  if (editId) {
-    projects = projects.map(p => p.id === editId ? proj : p);
-    showToast('프로젝트가 수정되었습니다.', 'success');
-  } else {
-    projects.push(proj);
-    showToast('프로젝트가 추가되었습니다.', 'success');
+  function openUploadModal() {
+    uploadedRows = [];
+    excelHeaders = [];
+    document.getElementById('mappingSection').style.display = 'none';
+    document.getElementById('previewSection').style.display = 'none';
+    document.getElementById('uploadSaveBtn').style.display = 'none';
+    document.getElementById('excelFileInput').value = '';
+    document.getElementById('uploadModal').classList.add('open');
   }
-  closeModal();
-  renderTable();
-  updateStats();
-}
+  function closeUploadModal() { document.getElementById('uploadModal').classList.remove('open'); }
+  function closeUploadModalOutside(e) { if (e.target === document.getElementById('uploadModal')) closeUploadModal(); }
 
-// ====================================================
-// DELETE
-// ====================================================
-function deleteProject(id) {
-  const p = projects.find(x => x.id === id);
-  if (!confirm('[' + p.code + '] ' + p.name + '\n\n이 프로젝트를 삭제하시겠습니까?')) return;
-  projects = projects.filter(x => x.id !== id);
-  renderTable();
-  updateStats();
-  showToast('프로젝트가 삭제되었습니다.', 'info');
-}
-
-// ====================================================
-// SORT
-// ====================================================
-function sortBy(field) {
-  if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  else { sortField = field; sortDir = 'asc'; }
-  document.querySelectorAll('th').forEach(th => th.className = '');
-  const el = document.getElementById('th-' + field);
-  if (el) el.className = 'sort-' + sortDir;
-  renderTable();
-}
-
-// ====================================================
-// FILTER + RENDER
-// ====================================================
-function getFiltered() {
-  const q      = document.getElementById('searchInput').value.toLowerCase();
-  const fType  = document.getElementById('filterType').value;
-  const fStat  = document.getElementById('filterStatus').value;
-  const fYear  = document.getElementById('filterYear').value;
-
-  return projects.filter(p => {
-    const matchQ    = !q || p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || p.client.toLowerCase().includes(q);
-    const matchType = !fType  || p.type   === fType;
-    const matchStat = !fStat  || p.status === fStat;
-    const matchYear = !fYear  || (p.year || '') === fYear;
-    return matchQ && matchType && matchStat && matchYear;
-  }).sort((a, b) => {
-    let va = a[sortField] ?? '';
-    let vb = b[sortField] ?? '';
-    if (sortField === 'progress') { va = +va; vb = +vb; }
-    const cmp = va < vb ? -1 : va > vb ? 1 : 0;
-    return sortDir === 'asc' ? cmp : -cmp;
+  // Drag & Drop
+  const dropZone = document.getElementById('dropZone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processExcelFile(file);
   });
-}
 
-function dday(endStr, status) {
-  if (status === '완료') return { label:'완료', cls:'dday-done' };
-  if (!endStr) return { label:'-', cls:'dday-done' };
-  const today = new Date(); today.setHours(0,0,0,0);
-  const end   = new Date(endStr);
-  const diff  = Math.ceil((end - today) / 86400000);
-  if (diff < 0)  return { label:'D+' + Math.abs(diff), cls:'dday-urgent' };
-  if (diff === 0) return { label:'D-DAY', cls:'dday-urgent' };
-  if (diff <= 14) return { label:'D-' + diff, cls:'dday-near' };
-  return { label:'D-' + diff, cls:'dday-ok' };
-}
-
-function progressClass(v) {
-  if (v < 30) return 'low';
-  if (v < 70) return 'mid';
-  return 'high';
-}
-
-function statusDot(s) {
-  const map = { '진행중':'dot-active', '대기중':'dot-wait', '검토중':'dot-review', '완료':'dot-done' };
-  return map[s] || 'dot-done';
-}
-
-function renderTable() {
-  const data = getFiltered();
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '';
-
-  if (!data.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="10">// NO PROJECTS FOUND</td></tr>';
-    document.getElementById('footerCount').textContent = '0 건';
-    return;
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) processExcelFile(file);
   }
 
-  data.forEach((p, i) => {
-    const dd  = dday(p.end, p.status);
-    const pct = Math.min(100, Math.max(0, p.progress));
-    const tr  = document.createElement('tr');
-    tr.style.animationDelay = (i * 0.035) + 's';
-    tr.innerHTML = `
-      <td>
-        <span class="code-cell code-${p.type.toLowerCase()}">${p.code}</span>
-      </td>
-      <td><span class="name-cell" title="${p.name}">${p.name}</span></td>
-      <td><span class="client-cell">${p.client}</span></td>
-      <td><span class="badge badge-${p.type.toLowerCase()}">${p.type}</span></td>
-      <td>
-        <span class="status-dot">
-          <span class="dot ${statusDot(p.status)}"></span>
-          ${p.status}
-        </span>
-      </td>
-      <td>
-        <div class="progress-wrap">
-          <div class="progress-bar">
-            <div class="progress-fill ${progressClass(pct)}" style="width:${pct}%"></div>
-          </div>
-          <span class="progress-pct">${pct}%</span>
-        </div>
-      </td>
-      <td class="date-cell">${p.start || '-'}</td>
-      <td class="date-cell">${p.end   || '-'}</td>
-      <td><span class="dday ${dd.cls}">${dd.label}</span></td>
-      <td>
-        <div class="actions">
-          <button class="icon-btn edit" onclick="openModal(${p.id})" title="수정">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="icon-btn del" onclick="deleteProject(${p.id})" title="삭제">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-          </button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
+  function processExcelFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (data.length < 2) { showToast('데이터가 없는 파일입니다.', ''); return; }
+        excelHeaders = data[0].map(h => String(h).trim());
+        uploadedRows = data.slice(1).filter(row => row.some(cell => cell !== ''));
+        renderMappingUI();
+      } catch(err) {
+        showToast('파일을 읽는 중 오류가 발생했습니다.', '');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function autoDetectMapping() {
+    const mapping = {};
+    FIELD_DEFS.forEach(f => {
+      const kws = FIELD_KEYWORDS[f.key] || [];
+      const matched = excelHeaders.findIndex(h =>
+        kws.some(kw => h.toLowerCase().includes(kw.toLowerCase()))
+      );
+      mapping[f.key] = matched >= 0 ? String(matched) : '';
+    });
+    return mapping;
+  }
+
+  function renderMappingUI() {
+    const mapping = autoDetectMapping();
+    const grid = document.getElementById('mappingGrid');
+    grid.innerHTML = '';
+    FIELD_DEFS.forEach(f => {
+      const label = document.createElement('div');
+      label.className = 'mapping-label';
+      label.textContent = f.label + (f.required ? ' *' : '');
+
+      const arrow = document.createElement('div');
+      arrow.className = 'mapping-arrow';
+      arrow.textContent = '>';
+
+      const sel = document.createElement('select');
+      sel.className = 'mapping-select';
+      sel.id = 'map_' + f.key;
+      sel.innerHTML = '<option value="">-- 선택 안함 --</option>' +
+        excelHeaders.map((h, i) => `<option value="${i}" ${mapping[f.key] === String(i) ? 'selected' : ''}>${h}</option>`).join('');
+      sel.onchange = renderPreview;
+
+      grid.appendChild(label);
+      grid.appendChild(arrow);
+      grid.appendChild(sel);
+    });
+    document.getElementById('mappingSection').style.display = 'block';
+    renderPreview();
+  }
+
+  function getCurrentMapping() {
+    const m = {};
+    FIELD_DEFS.forEach(f => {
+      const sel = document.getElementById('map_' + f.key);
+      m[f.key] = sel && sel.value !== '' ? parseInt(sel.value) : null;
+    });
+    return m;
+  }
+
+  function parseDate(val) {
+    if (!val) return '';
+    const s = String(val).trim();
+    // Excel serial number
+    if (/^\d{4,5}$/.test(s)) {
+      const d = XLSX.SSF.parse_date_code(parseInt(s));
+      if (d) return String(d.y) + '-' + String(d.m).padStart(2,'0') + '-' + String(d.d).padStart(2,'0');
+    }
+    // YYYY-MM-DD or YYYY.MM.DD
+    const m = s.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+    if (m) return m[1] + '-' + m[2].padStart(2,'0') + '-' + m[3].padStart(2,'0');
+    return s;
+  }
+
+  function rowToProject(row, mapping) {
+    const get = key => mapping[key] !== null ? String(row[mapping[key]] || '').trim() : '';
+    return {
+      code:   get('code'),
+      name:   get('name'),
+      client: get('client'),
+      review: get('review') || '사전',
+      date:   parseDate(get('date')),
+      sales:  get('sales'),
+      result: get('result') || '-',
+      status: get('status') || '미정',
+      note:   get('note'),
+    };
+  }
+
+  function renderPreview() {
+    const mapping = getCurrentMapping();
+    const parsed = uploadedRows.map(row => rowToProject(row, mapping));
+    const section = document.getElementById('previewSection');
+    const head = document.getElementById('previewHead');
+    const body = document.getElementById('previewBody');
+    const countEl = document.getElementById('previewCount');
+
+    if (parsed.length === 0) { section.style.display = 'none'; document.getElementById('uploadSaveBtn').style.display = 'none'; return; }
+
+    const cols = ['code','name','client','review','date','sales','result','status','note'];
+    const labels = { code:'코드', name:'프로젝트명', client:'고객사', review:'검토구분', date:'검토일자', sales:'담당영업', result:'검토결과', status:'현재상태', note:'비고' };
+
+    head.innerHTML = '<tr>' + cols.map(c => '<th>' + labels[c] + '</th>').join('') + '</tr>';
+    body.innerHTML = parsed.map(p =>
+      '<tr class="row-new">' + cols.map(c => '<td>' + (p[c] || '-') + '</td>').join('') + '</tr>'
+    ).join('');
+
+    countEl.innerHTML = '신규 추가 <strong>' + parsed.length + '건</strong>';
+    section.style.display = 'block';
+    document.getElementById('uploadSaveBtn').style.display = 'inline-flex';
+  }
+
+  function saveUploadedData() {
+    const mapping = getCurrentMapping();
+    if (!mapping.code && mapping.code !== 0) { showToast('프로젝트 코드 컬럼을 매핑해주세요.', ''); return; }
+    if (!mapping.name && mapping.name !== 0) { showToast('프로젝트명 컬럼을 매핑해주세요.', ''); return; }
+
+    const parsed = uploadedRows.map(row => rowToProject(row, mapping)).filter(p => p.code && p.name);
+    let addedCount = 0;
+
+    // ★ 중복 체크 없이 무조건 신규 추가
+    parsed.forEach(p => {
+      projects.push({ id: Date.now() + Math.random(), ...p });
+      addedCount++;
+    });
+
+    closeUploadModal();
+
+    // ★ 핵심: 저장 완료 후 Stats + Table + SalesFilter 모두 갱신
+    renderStats();
+    renderTable();
+    populateSalesFilter();
+
+    showToast(addedCount + '건이 추가되었습니다.', 'success');
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (type === 'success' ? ' toast-success' : '') + ' show';
+    setTimeout(() => { t.classList.remove('show'); }, 3000);
+  }
+
+  // ── EVENT LISTENERS ───────────────────────────────────────
+  document.getElementById('searchInput').addEventListener('input', renderTable);
+  document.getElementById('filterStatus').addEventListener('change', function() {
+    activeStatusFilter = this.value;
+    renderStats();
+    renderTable();
   });
+  document.getElementById('filterReview').addEventListener('change', renderTable);
+  document.getElementById('filterSales').addEventListener('change', renderTable);
 
-  document.getElementById('footerCount').textContent = data.length + ' 건 / 전체 ' + projects.length + ' 건';
-}
-
-// ====================================================
-// STATS
-// ====================================================
-function updateStats() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const urgent = projects.filter(p => {
-    if (!p.end || p.status === '완료') return false;
-    const diff = Math.ceil((new Date(p.end) - today) / 86400000);
-    return diff >= 0 && diff <= 14;
-  });
-  document.getElementById('statTotal').textContent  = projects.length;
-  document.getElementById('statSI').textContent     = projects.filter(p => p.type === 'SI').length;
-  document.getElementById('statSM').textContent     = projects.filter(p => p.type === 'SM').length;
-  document.getElementById('statDone').textContent   = projects.filter(p => p.status === '완료').length;
-  document.getElementById('statUrgent').textContent = urgent.length;
-}
-
-// ====================================================
-// CSV EXPORT
-// ====================================================
-function exportCSV() {
-  const headers = ['프로젝트코드','프로젝트명','고객사','유형','상태','진행률(%)','시작일','종료일'];
-  const rows = projects.map(p => [p.code, p.name, p.client, p.type, p.status, p.progress, p.start, p.end].join(','));
-  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'SI-SM_Projects_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  showToast('CSV 파일이 다운로드되었습니다.', 'success');
-}
-
-// ====================================================
-// TOAST
-// ====================================================
-function showToast(msg, type = 'info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + type + ' show';
-  setTimeout(() => { t.className = 'toast'; }, 3000);
-}
+  init();
 </script>
 </body>
 </html>
